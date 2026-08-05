@@ -157,3 +157,22 @@ def test_one_vs_rest_near_perfect_agreement_on_separable_data():
     mismatches = int(np.sum(ours.predict(X) != theirs.predict(X)))
     # on cleanly separable data both should be ~identical; allow a tiny drift
     assert mismatches <= 2, f"expected <=2 label mismatches vs sklearn, got {mismatches}"
+
+
+def test_one_vs_rest_shuffled_noncontiguous_labels_match_sklearn():
+    # non-0..k-1 labels in a shuffled *class order* must be handled by both the
+    # same way: predictions reproduce the raw labels, not a densified subset.
+    X, y = make_separable_3class(seed=7)
+    raw_labels = np.array([10, 30, 20])
+    # class 0 -> 10, class 1 -> 30, class 2 -> 20 (non-sorted id order)
+    y_raw = raw_labels[y]
+
+    ours = OneVsRestClassifier(LogisticRegression(max_iter=1000, random_state=0)).fit(X, y_raw)
+    theirs = SkOneVsRest(SkLogisticRegression(max_iter=1000)).fit(X, y_raw)
+
+    pred_ours, pred_theirs = ours.predict(X), theirs.predict(X)
+    # both return the raw labels, and the true label of every sample is matched
+    assert set(pred_ours) == set(raw_labels)
+    assert int(np.sum(ours.predict(X) != y_raw)) <= 1
+    mismatches = int(np.sum(pred_ours != pred_theirs))
+    assert mismatches <= 2, f"expected <=2 label mismatches vs sklearn, got {mismatches}"

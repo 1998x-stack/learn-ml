@@ -72,8 +72,9 @@ class OneVsRestClassifier(BaseEstimator, ClassifierMixin):
 
     def _score_matrix(self, X) -> np.ndarray:
         """Stack each clone's positive-class probability into an (n, k) matrix."""
-        check_array(X)
-        if hasattr(X, "shape") and X.shape[1] != self.n_features_in_:
+        check_is_fitted(self, ["estimators_", "classes_", "n_features_in_"])
+        X = check_array(X)
+        if X.shape[1] != self.n_features_in_:
             raise ValueError("X has a different number of features than during fitting.")
         scores = np.empty((X.shape[0], len(self.estimators_)), dtype=float)
         for j, est in enumerate(self.estimators_):
@@ -91,8 +92,6 @@ class OneVsRestClassifier(BaseEstimator, ClassifierMixin):
 
     def predict(self, X) -> np.ndarray:
         """Return the class label with the highest positive score per row."""
-        check_is_fitted(self, ["estimators_", "classes_", "n_features_in_"])
-        X = check_array(X)
         scores = self._score_matrix(X)
         # argmax picks the highest score per row; np.argmax returns the first
         # (lowest index) among ties, which matches the lower-class-id tie rule.

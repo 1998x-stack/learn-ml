@@ -20,6 +20,12 @@ def test_predict_before_fit_raises_value_error():
         OneVsRestClassifier(LogisticRegression()).predict(X)
 
 
+def test_predict_proba_before_fit_raises_value_error():
+    # protocol parity: predict AND predict_proba must both be ValueErrors pre-fit
+    with pytest.raises(ValueError, match="fitted"):
+        OneVsRestClassifier(LogisticRegression()).predict_proba(X)
+
+
 def test_get_params_returns_estimator():
     base = LogisticRegression(learning_rate=0.3, max_iter=500)
     model = OneVsRestClassifier(base)
