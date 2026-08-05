@@ -81,3 +81,15 @@ def test_confusion_matrix_handles_missing_class():
     cm = confusion_matrix(y_true, y_pred, labels=np.array([0, 1, 2]))
     assert cm.shape == (3, 3)
     assert np.array_equal(cm[2, :], np.zeros(3))
+
+
+def test_confusion_matrix_derives_labels_from_data_by_default():
+    y_true = np.array([0, 1, 0, 1])
+    y_pred = np.array([0, 1, 2, 1])  # 2 出现在 y_pred 而未出现在 y_true
+    cm = confusion_matrix(y_true, y_pred)
+    # 类序按 np.unique(concat([y_true, y_pred]))：{0,1,2} -> (3, 3)
+    assert cm.shape == (3, 3)
+    assert cm.sum() == len(y_true)
+    # 2 仅作为预测类别出现 -> 行全 0、列非零
+    assert np.array_equal(cm[2, :], np.zeros(3))
+    assert cm[:, 2].sum() == 1

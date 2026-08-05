@@ -23,7 +23,7 @@ class BaseEstimator:
     def set_params(self, **params) -> "BaseEstimator":
         for key, value in params.items():
             if not hasattr(self, key):
-                raise AttributeError(f"Invalid parameter {key!r}")
+                raise ValueError(f"Invalid parameter {key!r}")
             setattr(self, key, value)
         return self
 

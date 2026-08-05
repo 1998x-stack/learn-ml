@@ -1,8 +1,6 @@
 """Regression metrics (s04 version)."""
 from __future__ import annotations
 
-from typing import Union
-
 import numpy as np
 
 from ..utils.validation import check_consistent_length

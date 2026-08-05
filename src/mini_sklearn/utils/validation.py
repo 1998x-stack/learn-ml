@@ -1,7 +1,6 @@
 """Input and state validation utilities (s03 version)."""
 from __future__ import annotations
 import numbers
-from typing import Union
 import numpy as np
 
 
@@ -28,7 +27,7 @@ def check_X_y(X, y) -> tuple:
     return X_a, y_a
 
 
-def check_is_fitted(estimator, attributes: Union[str, list], msg: str | None = None) -> None:
+def check_is_fitted(estimator, attributes: str | list, msg: str | None = None) -> None:
     if isinstance(attributes, str):
         attributes = [attributes]
     missing = [a for a in attributes if not hasattr(estimator, a)]
