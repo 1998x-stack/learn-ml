@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from src.mini_sklearn.naive_bayes import GaussianNB
+from src.mini_sklearn.naive_bayes import BernoulliNB, GaussianNB, MultinomialNB
 
 
 def make_separable_twofeature():
@@ -76,3 +76,63 @@ def test_predict_proba_wrong_n_features_raises():
 def test_predict_proba_before_fit_raises_value_error():
     with pytest.raises(ValueError, match="fitted"):
         GaussianNB().predict_proba(np.zeros((2, 2)))
+
+
+# ---------------------------------------------------------------------------
+# Fitted predict path for MultinomialNB / BernoulliNB (n_samples != n_classes).
+# These exercise the exact orientation bug that previously broke the broadcast
+# when a non-square (n_samples, n_classes) predict batch is passed.
+# ---------------------------------------------------------------------------
+# 5 train samples, 2 classes -> n_samples != n_classes on the predict batch (3).
+# Hand-computed (alpha=1, Laplace): class0 feature counts [4,4,0,1] sum 9,
+# smoothed /13 as [5,5,1,2]; class1 [0,0,3,3] sum 6, smoothed /10 as [1,1,4,3].
+# Priors = log(3/5), log(2/5).  Probes [0,1,2] -> argmax log-posterior [0,1,0].
+MULTI_X = np.array(
+    [[2, 1, 0, 0], [1, 2, 0, 0], [0, 0, 2, 1], [0, 0, 1, 2], [1, 1, 0, 1]], dtype=float
+)
+MULTI_Y = np.array([0, 0, 1, 1, 0])
+MULTI_PROBE = np.array([[1, 1, 0, 0], [0, 0, 1, 1], [1, 0, 1, 0]], dtype=float)
+
+
+def test_multinomialnb_fitted_predict_and_hand_log_posterior():
+    model = MultinomialNB(alpha=1.0).fit(MULTI_X, MULTI_Y)
+    jll = model.joint_log_likelihood(MULTI_PROBE)  # (3, 2) not (2, 3)
+    assert jll.shape == (MULTI_PROBE.shape[0], 2)
+    # hand: probe[0]=[1,1,0,0] -> class0 log0.6 + 2*log(5/13), class1 log0.4+2*log(1/10)
+    np.testing.assert_allclose(
+        jll[0],
+        [np.log(0.6) + 2 * np.log(5 / 13), np.log(0.4) + 2 * np.log(1 / 10)],
+        rtol=1e-10,
+    )
+    pred = model.predict(MULTI_PROBE)
+    np.testing.assert_array_equal(pred, [0, 1, 0])  # argmax log-posterior
+    assert np.isin(pred, model.classes_).all()
+    P = model.predict_proba(MULTI_PROBE)
+    np.testing.assert_allclose(P.sum(axis=1), 1.0, atol=1e-12)
+    assert np.all(P > 0.0) and np.all(P < 1.0)
+
+
+# Binary 0/1 features, 5 train / 3 probe, 2 classes.
+# class0 counts [3,2,2] over 3 rows  -> +alpha /(3+2): P_present [0.8,0.6,0.6]
+# class1 counts [0,1,1] over 2 rows  -> +alpha /(2+2): P_present [0.25,0.5,0.5]
+# priors log(3/5), log(2/5); probe [1,0,1] is a class-0 training row -> predict 0.
+BERN_X = np.array([[1, 1, 0], [1, 0, 1], [0, 1, 0], [0, 0, 1], [1, 1, 1]], dtype=float)
+BERN_Y = np.array([0, 0, 1, 1, 0])
+BERN_PROBE = np.array([[1, 0, 1], [0, 1, 0], [1, 1, 0]], dtype=float)
+
+
+def test_bernoullinb_fitted_predict_matches_hand_log_posterior():
+    model = BernoulliNB(alpha=1.0).fit(BERN_X, BERN_Y)
+    probe = BERN_PROBE[:1]  # [1,0,1] -> class 0 (a training row of it)
+    jll = model.joint_log_likelihood(probe)  # (1, 2), not (2, 1)
+    assert jll.shape == (1, 2)
+    # hand: class0 = log.6 + log.8 + log.6 + log.4 ; class1 = log.4+log.25+log.5+log.5
+    hand0 = np.log(0.6) + np.log(0.8) + np.log(0.6) + np.log(0.4)
+    hand1 = np.log(0.4) + np.log(0.25) + np.log(0.5) + np.log(0.5)
+    np.testing.assert_allclose(jll[0], [hand0, hand1], rtol=1e-10)
+    assert model.predict(probe)[0] == 0  # argmax log-posterior
+    P = model.predict_proba(BERN_PROBE)
+    assert P.shape == (BERN_PROBE.shape[0], 2)
+    np.testing.assert_allclose(P.sum(axis=1), 1.0, atol=1e-12)
+    assert np.all(P > 0.0) and np.all(P < 1.0)
+    assert np.isin(model.predict(BERN_PROBE), model.classes_).all()

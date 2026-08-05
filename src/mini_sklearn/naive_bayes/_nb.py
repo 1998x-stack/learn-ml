@@ -154,7 +154,8 @@ class MultinomialNB(BaseEstimator, ClassifierMixin):
 
     def joint_log_likelihood(self, X) -> np.ndarray:
         X = self._check_is_fitted(X)
-        return self.feature_log_prob_ @ X.T + self.class_log_prior_[:, None].T
+        # feature_log_prob_ @ X.T is (K, n); transpose to (n, K)
+        return (self.feature_log_prob_ @ X.T).T + self.class_log_prior_[None, :]
 
     def predict_proba(self, X) -> np.ndarray:
         return _stable_log_softmax(self.joint_log_likelihood(X))
