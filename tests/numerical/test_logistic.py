@@ -8,6 +8,9 @@ from src.mini_sklearn.linear_model import LogisticRegression
 
 def make_separable():
     """Two clearly-separated Gaussian blobs (deterministic, seed-fixed)."""
+    # seed=1 is hand-picked: make_classification's blob centers/noise make
+    # training acc > 0.8 only for a few seeds (roughly 1, 4, 5, 7, 10); most
+    # others overlap enough that the logistic decision boundary misses 0.8.
     X, y = make_classification(n_samples=100, n_features=2, random_state=1)
     return X, y
 
