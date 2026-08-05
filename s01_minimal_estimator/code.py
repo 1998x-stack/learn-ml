@@ -37,6 +37,7 @@ class MeanRegressor:
         return np.full(X.shape[0], self.constant_)
 
 
+# --- v0.1.2: constant classifier / most-frequent prediction ---
 class MostFrequentClassifier:
     """Predicts the most frequent training class for every sample."""
 

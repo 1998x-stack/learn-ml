@@ -176,12 +176,6 @@ model = MeanRegressor().fit(X, y)
 
 3. 先不 `fit` 直接 `predict`，确认报错信息能解释「先 fit 再预测」。
 
-1. 给 `MeanRegressor` 增加一个超参数 `offset`（预测值 = 均值 + offset），观察它属于 `_` 后缀还是不带 `_`（提示：它是「超参数」，在 `__init__` 里设置、不带 `_`）。
-
-2. 用 `DummyClassifier(strategy="most_frequent")` 复现 `MostFrequentClassifier`，比较两者对你的类的行为差异。
-
-3. 预测前先抛这个 `AttributeError`（先不 `fit` 直接 `predict`），确认报错信息能解释「先 fit 再预测」。
-
 ## 14. 下一章
 
 现在模型能训练了，但每个模型都可能使用不同的接口。
