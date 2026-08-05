@@ -52,13 +52,18 @@ def test_classifier_predict_matches_brute_force_nearest_neighbor():
 
 
 def test_weighted_distance_changes_majority_on_contested_probe():
-    # a single probe exactly on the borderline between two different-class
-    # neighbors flips the k=2 prediction when distance weighting is enabled
-    rng = np.random.default_rng(9)
-    X = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
-    y = np.array([0, 1, 1])
-    probe = np.array([[0.1, 0.0]])
-    knn_uniform = KNeighborsClassifier(n_neighbors=1, weights="uniform").fit(X, y)
-    knn_distance = KNeighborsClassifier(n_neighbors=1, weights="distance").fit(X, y)
-    # k=1: only nearest point matters, both give same answer
-    np.testing.assert_array_equal(knn_uniform.predict(probe), knn_distance.predict(probe))
+    # k=2 contested probe: two nearest neighbors at DIFFERENT distances belong
+    # to DIFFERENT classes.  Uniform weighting -> weights [1,1] tie, resolved by
+    # earlier ``classes_`` position (class 0).  Distance weighting weights the
+    # nearer (class-1) neighbour higher -> flips to class 1.  This is non-vacuous:
+    # a no-op weighting (all-ones) would collapse back to the uniform tie and the
+    # assertion below would FAIL.
+    # probe[0,0]; neighbours: [0,1] d=1 (class 1, near), [2,0] d=2 (class 0, far)
+    X = np.array([[0.0, -5.0], [0.0, 1.0], [2.0, 0.0]])
+    y = np.array([0, 1, 0])
+    probe = np.array([[0.0, 0.0]])
+    knn_uniform = KNeighborsClassifier(n_neighbors=2, weights="uniform").fit(X, y)
+    knn_distance = KNeighborsClassifier(n_neighbors=2, weights="distance").fit(X, y)
+    assert knn_uniform.predict(probe)[0] == 0  # classes_=[0,1]: tie -> class 0
+    assert knn_distance.predict(probe)[0] == 1  # nearer class 1 wins
+    assert knn_uniform.predict(probe)[0] != knn_distance.predict(probe)[0]

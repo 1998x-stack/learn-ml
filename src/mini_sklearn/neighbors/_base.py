@@ -11,26 +11,31 @@ from __future__ import annotations
 import numpy as np
 
 from ..base import BaseEstimator, ClassifierMixin, RegressorMixin
-from ..metrics import cosine_similarity, euclidean_distances, manhattan_distances
+from ..metrics import euclidean_distances, manhattan_distances
 from ..utils.validation import check_array, check_is_fitted, check_X_y
 
 __all__ = ["KNeighborsClassifier", "KNeighborsRegressor"]
 
+# ``cosine`` is intentionally NOT supported: it is a similarity (larger = more
+# alike), so argsorting ascending would treat the *least* similar as "nearest".
 _METRICS = {
     "euclidean": euclidean_distances,
     "manhattan": manhattan_distances,
-    "cosine": cosine_similarity,
 }
 
 
 def _neighbor_indices(X, X_fit, k: int, metric: str) -> np.ndarray:
-    """Return for each row of ``X`` the indices (into ``X_fit``) of its k nearest.
+    """Return indices of each row of ``X`` into ``X_fit`` of its k nearest.
 
     ``k`` nearest means the ``k`` smallest pair-wise distances.  For the small
-    teaching datasets here we argsort the full ``(n_x, n_fit)`` distance matrix
-    and take the first ``k`` columns per row (ties resolve to the *first*
-    index encountered, which keeps the result deterministic).
+    teaching datasets here we argsort the full ``(n_x, n_fit)`` matrix and take
+    the first ``k`` columns per row (ties resolve to the *first* index
+    encountered, which keeps the result deterministic).
     """
+    if metric not in _METRICS:
+        raise ValueError(
+            f"Unsupported metric {metric!r}; choose from {sorted(_METRICS)}."
+        )
     distance_fn = _METRICS[metric]
     D = distance_fn(X, X_fit)
     return np.argsort(D, axis=1)[:, :k]
