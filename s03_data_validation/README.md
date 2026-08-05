@@ -35,7 +35,7 @@ model.predict(X_wrong_features)    # 特征数不对 → 直接算错
 "契约"不改变任何数值结果，但它改变**谁在什么时候发现错误**：
 
 ```text
-无契约： 企 X 传错 → 深处 np.mean / np.dot 抛晦涩异常，甚至静默算出错误答案
+无契约： 把 X 传错 → 深处 np.mean / np.dot 抛晦涩异常，甚至静默算出错误答案
 有契约： 传入 check_X_y → 立刻抛出"是哪一维、什么性质"的明确 ValueError
 ```
 
