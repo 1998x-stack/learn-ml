@@ -1,6 +1,7 @@
+[返回根目录](../README.md)
+
 # s08：Logistic Regression——从得分到概率再到类别
 
-[返回根目录](../README.md)
 
 > 本章口号：**从得分到概率再到类别。**
 >

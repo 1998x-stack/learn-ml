@@ -1,6 +1,7 @@
+[返回根目录](../README.md)
+
 # s00：全景导览（Panorama）
 
-[返回根目录](../README.md)
 
 > 本章无代码，只搭建整个 mini-sklearn 课程的心智地图。
 >

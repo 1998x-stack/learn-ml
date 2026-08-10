@@ -1,6 +1,7 @@
+[返回根目录](../README.md)
+
 # s01：Minimal Estimator——一个 `fit` 加一个 `predict` 就够了
 
-[返回根目录](../README.md)
 
 > 本章口号：一个 `fit` 加一个 `predict`，就是最小可运行模型。
 >

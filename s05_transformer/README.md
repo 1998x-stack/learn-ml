@@ -1,6 +1,7 @@
+[返回根目录](../README.md)
+
 # s05：Transformer——学习数据状态，但不预测目标
 
-[返回根目录](../README.md)
 
 > 本章口号：**Transformer 学习数据状态，但不预测目标。**
 >
