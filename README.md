@@ -1,5 +1,7 @@
 # Learn ML — 从零实现 mini-scikit-learn（NumPy 递进式教程）
 
+> **English TL;DR:** Build a mini scikit-learn from scratch with NumPy — not by calling APIs, but by assembling the Estimator harness. Two tracks: a teaching track (self-contained `code.py` per chapter) and a framework track (`src/mini_sklearn/` real package + parity-aligned tests against scikit-learn). "One Estimator & NumPy is all you need." Done: v0.1–v0.2 (s01–s09: minimal closed loop, estimator protocol, data validation, eval, transformers, linear/logistic regression, multiclass); roadmap to v1.0 (s10–s20) in `versions.md`.
+
 从零用 NumPy 搭建一个迷你 scikit-learn，覆盖 `learn-ml/versions.md` 的完整迭代路线：**最小监督学习闭环（v0.1，s01–s04）→ 预处理与线性学习（v0.2，s05–s09）→ 经典非线性模型（v0.3，s10–s13）→ 交叉验证、搜索与 Pipeline（v0.4，s14–s16）→ 无监督学习（v0.5，s17–s18）→ 第三方 Estimator（v0.9，s19）→ 完整 mini-sklearn（v1.0，s20）**。当前已完成 **v0.1（s01–s04）与 v0.2（s05–s09）** 两个迭代（含针对 dev-only `scikit-learn` 的 parity 对齐测试）；后续 v0.3–v1.0（s10–s20）见 `versions.md`。
 
 本教程是 learn-claude-code / learn-llm / learn-seq2seq 系列在"从零拆装 scikit-learn"方向的延伸。核心口号：
