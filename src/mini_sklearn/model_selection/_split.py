@@ -20,8 +20,14 @@ def train_test_split(
     if not arrays:
         raise ValueError("At least one array required as input to train_test_split")
     n = arrays[0].shape[0]
+    if isinstance(test_size, (bool, np.bool_)) or not isinstance(test_size, (int, float, np.integer, np.floating)):
+        raise ValueError("test_size must be a finite float in (0, 1)")
+    if not np.isfinite(test_size) or not 0 < test_size < 1:
+        raise ValueError("test_size must be a finite float in (0, 1)")
+    n_test = int(np.ceil(n * test_size))
+    if n_test == 0 or n_test >= n:
+        raise ValueError("test_size must leave at least one training and one test sample")
     rng = check_random_state(random_state)
     perm = rng.permutation(n)
-    n_test = int(np.ceil(n * test_size))
     test_idx, train_idx = perm[:n_test], perm[n_test:]
     return [a[train_idx] for a in arrays] + [a[test_idx] for a in arrays]
