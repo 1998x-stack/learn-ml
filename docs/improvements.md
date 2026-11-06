@@ -12,5 +12,5 @@
 - Security & regression review: No secrets, permissions, workflow, deployment, or production changes. Valid test_size=0.25 retains original order. Regression risk: callers relying on invalid/empty partitions now receive ValueError.
 - Risk & rollback: Low; close this Draft PR or revert its commits on the feature branch; default branch untouched.
 - Follow-up: Run full repository pytest and parity suite in a real checkout, including numpy scalar type edge cases.
-- Commit: pending
-- PR: pending
+- Commit: d83bac845bad2e42a6332c2680ad50eb2b0b16f2 (test change; history committed separately)
+- PR: https://github.com/1998x-stack/learn-ml/pull/1
