@@ -17,3 +17,25 @@ def test_train_test_split_deterministic_across_calls():
     a = train_test_split(np.arange(100.0), np.arange(100), random_state=7)
     b = train_test_split(np.arange(100.0), np.arange(100), random_state=7)
     assert np.array_equal(a[0], b[0]) and np.array_equal(a[1], b[1])
+
+
+def test_train_test_split_rejects_invalid_sizes():
+    import pytest
+
+    for size in (0, 1, -0.1, 1.1, float("nan"), float("inf"), True, "0.25"):
+        with pytest.raises(ValueError, match="test_size"):
+            train_test_split(np.arange(10), test_size=size, random_state=0)
+
+
+def test_train_test_split_rejects_empty_partition():
+    import pytest
+
+    for size in (0.1, 0.9):
+        with pytest.raises(ValueError, match="at least one training"):
+            train_test_split(np.arange(1), test_size=size, random_state=0)
+
+
+def test_train_test_split_keeps_both_partitions():
+    train, test = train_test_split(np.arange(2), test_size=0.5, random_state=0)
+    assert len(train) == len(test) == 1
+    assert sorted(np.concatenate([train, test]).tolist()) == [0, 1]
